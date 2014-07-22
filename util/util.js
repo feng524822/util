@@ -1,25 +1,69 @@
 !(function(window, undefined) {
+    var class2type = {};
+    (function() {
+         var type_arr = 'Boolean Number String Function Array Date RegExp Object'[ _split ](' ');
+        for (var i = 0, len = type_arr[ _length ]; i < len; i++) {
+            class2type[ "[object " + type_arr[ i ] + "]" ] = type_arr[ i ]["toLowerCase"]();
+        }
+    })();
+
     return {
-        type: function() {
-
+        /**
+         * 获取变量类型
+         * @param  {?} variable [传入变量]
+         * @return {String}
+         */
+        type: function(variable) {
+            return variable == null ? String( variable ) : class2type[ Object.prototype.toString[_apply]( variable ) ] || 'object';
         },
-        isObject: function() {
-
+        /**
+         * 判断变量是否为对象
+         * @param  {?} variable [传入变量]
+         * @return {Boolean}
+         */
+        isObject: function(variable) {
+            return  'object' == type(variable);
         },
-        isArray: function() {
-
+        /**
+         * 判断变量是否为数组
+         * @param  {?} variable [传入变量]
+         * @return {Boolean}
+         */
+        isArray: function(variable) {
+            return  'array' == type(variable);
         },
-        isString: function() {
-
+        /**
+         * 判断变量是否为字符串
+         * @param  {?} variable [传入变量]
+         * @return {Boolean}
+         */
+        isString: function(variable) {
+            return 'string' == type(variable);
         },
-        isNumber: function() {
-
+        /**
+         * 判断变量是否为数字
+         * @param  {?} variable [传入变量]
+         * @return {Boolean}
+         */
+        isNumber: function(variable) {
+            return !isNaN(parseFloat(variable)) && isFinite(variable);
         },
-        isFunction: function() {
-
+        /**
+         * 判断变量是否为函数
+         * @param  {?} variable [传入变量]
+         * @return {Boolean}
+         */
+        isFunction: function(variable) {
+            return 'function' == type(variable);
         },
-        isID: function() {
-
+        /**
+         * 判断是不是一个合格的id
+         */
+        isID: function(variable) {
+            if (id === '0' || id === 0) {
+                return true;
+            }
+            return (/^[1-9]\d*$/).test(id);
         },
         ucFirst: function(str) {
             str += '';
@@ -117,23 +161,107 @@
 
             return input;
         },
-        startsWidth: function() {
-
+        /**
+         * 字符串是否以某字符开头
+         * @param  {String}  str      [要检测的字符]
+         * @param  {String}  startStr [包含的字符]
+         * @return {Boolean}
+         */
+        startsWidth: function(str, startStr) {
+            str += "";
+            startStr += "";
+            return str.length !== 0 &&　startStr.length !== 0 && str.indexOf(startStr) === 0;
         },
+        /**
+         * 字符串是否以某字符结尾
+         * @param  {String}  str      [要检测的字符]
+         * @param  {String}  startStr [包含的字符]
+         * @return {Boolean}
+         */
         endsWidth: function() {
-
+            str += "";
+            endStr += "";
+            return str.length !== 0 && endStr.length !== 0 && str.lastIndexOf(endStr) + endStr.length === str.length;
         },
         contain: function() {
 
         },
         quote: function() {
-            //optmatily
+            var pattern = /["\\\x00-\x1f\x7f-\x9f]/g,
+                replacement = {
+                    "\b": "\\b",
+                    "\t": "\\t",
+                    "\n": "\\n",
+                    "\f": "\\f",
+                    "\r": "\\r",
+                    '"': '\\"',
+                    "\\": "\\\\"
+                };
+
+            return str.match(pattern) ? '"' + str.replace(pattern, function(mode) {
+                var toStr = replacement[mode];
+                if ("string" === typeof toStr) {
+                    return toStr;
+                }
+                toStr = mode.charCodeAt();
+                return "\\u00" + Math.floor(pattern / 16).toString(16) + (pattern % 16).toString(16)
+            }) + '"' : '"' + str + '"';
         },
         quotemeta: function(str) {
             return (str + '').replace(/([\.\\\+\*\?\[\^\]\$\(\)])/g, '\\$1');
         },
         sprintf: function() {
-
+            for (var a = 0, c, b = arguments[a++], e = [], d, h, j; b; ) {
+                if (d = /^[^\x25]+/.exec(b))
+                    e.push(d[0]);
+                else if (d = /^\x25{2}/.exec(b))
+                    e.push("%");
+                else if (d = /^\x25(?:(\d+)\$)?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(b)) {
+                    if (null == (c = arguments[d[1] || a++]) || void 0 == c)
+                        throw "Too few arguments.";
+                    if (/[^s]/.test(d[7]) && "number" != typeof c)
+                        throw "Expecting number but found " + typeof c;
+                    switch (d[7]) {
+                        case "b":
+                            c = c.toString(2);
+                            break;
+                        case "c":
+                            c = String.fromCharCode(c);
+                            break;
+                        case "d":
+                            c = parseInt(c);
+                            break;
+                        case "e":
+                            c = d[6] ? c.toExponential(d[6]) : c.toExponential();
+                            break;
+                        case "f":
+                            c = d[6] ? parseFloat(c).toFixed(d[6]) : parseFloat(c);
+                            break;
+                        case "o":
+                            c = c.toString(8);
+                            break;
+                        case "s":
+                            c = (c = String(c)) && d[6] ? c.substring(0, d[6]) : c;
+                            break;
+                        case "u":
+                            c = Math.abs(c);
+                            break;
+                        case "x":
+                            c = c.toString(16);
+                            break;
+                        case "X":
+                            c = c.toString(16).toUpperCase()
+                    }
+                    c = /[def]/.test(d[7]) && d[2] && 0 <= c ? "+" + c : c;
+                    h = d[3] ? "0" == d[3] ? "0" : d[3].charAt(1) : " ";
+                    j = d[5] - String(c).length - 0;
+                    h = d[5] ? str_repeat(h, j) : "";
+                    e.push("" + (d[4] ? c + h : h + c))
+                } else
+                    throw "Huh ?!";
+                b = b.substring(d[0].length)
+            }
+            return e.join("")
         },
         addslashes: function() {
             return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
@@ -586,14 +714,52 @@
                 return String.fromCharCode(s.charCodeAt(0) + (s.toLowerCase() < 'n' ? 13 : -13));
             });
         },
-        hash: function() {
-
+        /**
+         * hash函数
+         * @param  {String} str [需要转为hash的字符串]
+         * @return {Number}     [转换后的hash值]
+         */
+        hash: function(str) {
+            var _hash = 1,
+                charCode = 0,
+                idx;
+            if (isStr(str) && str.length) {
+                _hash = 0;
+                for (idx = str.length - 1; idx >= 0; idx--) {
+                    charCode = str.charCodeAt(idx);
+                    _hash = (_hash << 6 & 268435455) + charCode + (charCode << 14);
+                    charCode = _hash & 266338304;
+                    _hash = charCode !== 0 ? _hash ^ charCode >> 21 : _hash;
+                }
+            }
+            return _hash;
         },
+        /**
+         * 获取随机整数
+         * @return {Int}
+         */
         random: function() {
-
+            /**
+             * 2,147,483,647（二十一亿四千七百四十八万三千六百四十七）是2147483646与2147483648之间的自然数，
+             * 也是欧拉在1772年所发现的一个梅森素数，它等于2^31 -1，是32位操作系统中最大的符号型整型常量。
+             */
+            return Math.round(Math.random() * 2147483647);
         },
+        /**
+         * 构造浏览器客户端唯一标示uuid
+         * @return {Number}
+         */
         uuid: function() {
-
+            var _history_length = history.length,
+                _javaEnabled = navigator && navigator.javaEnabled() ? 1 : 0,
+                _colorDepth = screen ? screen.colorDepth + "-bit" : "",
+                _screen = screen ? screen.width + "x" + screen.height : "",
+                _language = (navigator && navigator.language ? navigator.language : navigator && navigator.browserLanguage ? navigator.browserLanguage : "").toLowerCase();
+                _navStr = navigator.appName + navigator.version + _language + navigator.platform + navigator.userAgent + _javaEnabled + _screen + _colorDepth + (document.cookie ? document.cookie : "") + (document.referrer ? document.referrer : "");
+            for (var len = _navStr.length; _history_length > 0;) {
+                _navStr += _history_length-- ^ len++;
+            }
+            return this.random() ^ this.hash(_navStr) & 2147483647;
         },
         inArray: function(needle, haystack, argStrict) {
             //  discuss at: http://phpjs.org/functions/in_array/
@@ -926,6 +1092,20 @@
         },
         remove: function() {
 
+        },
+        /**
+         * 获取函数的形参个数
+         * @param  {Function} func [要获取的函数]
+         * @return {*}             [形参的数组或undefind]
+         */
+        getFuncParameters: function(func) {
+            if (typeof func == 'function') {
+                var mathes = /[^(]+\(([^)]*)?\)/gm.exec(Function.prototype.toString.call(func));
+                if (mathes[1]) {
+                    var args = mathes[1].replace(/[^,\w]*/g, '').split(',');
+                    return args;
+                }
+            }
         }
     }
 })(window);
